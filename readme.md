@@ -1,6 +1,6 @@
 # KayMaze
 
-A browser maze adventure with eight trainers, four possible starters, seven replayable biomes, and three difficulty modes. Choose Pikachu, Bulbasaur, Charmander, or Squirtle, clear obstacles with Pokémon moves, and reach the waiting Pokémon for a guaranteed catch.
+A browser maze adventure with eight regular trainers and a hidden trainer to discover, four possible starters, seven replayable biomes, and three difficulty modes. Choose Pikachu, Bulbasaur, Charmander, or Squirtle, clear obstacles with Pokémon moves, and reach the waiting Pokémon for a guaranteed catch.
 
 [Play KayMaze](https://dk2code.github.io/KayMaze/) · [GitHub repository](https://github.com/DK2Code/KayMaze)
 
@@ -8,7 +8,7 @@ A browser maze adventure with eight trainers, four possible starters, seven repl
 
 Granite Highlands is Trail 01, followed by Cerulean Creek, Amberwood Trail, Moonlit Cavern, Frostfall Hollow, Cinnabar Wilds, and Viridian Forest as Trail 07. Returning players retain access to previously unlocked trails, their collection, and their records.
 
-- Choose your trainer, starting Pokémon, and trail.
+- Choose a trail, optionally enter a player name, then choose your trainer and starting Pokémon. A blank name uses the selected trainer’s default name. Names and progress stay in this browser.
 - Click or tap a reachable path to walk. Your partner follows behind you.
 - Click or tap an obstacle to approach it and attack automatically. Choosing another destination or opening a menu cancels the action.
 - Optional keyboard controls: WASD or arrow keys to move, Space to attack, H for a route hint, and P or Escape to pause.
@@ -59,7 +59,7 @@ An unofficial noncommercial fan game. Pokémon characters and names belong to Ni
 
 - Pokémon portraits and canonical move data: PokéAPI.
 - Directional sprites: PMDCollab SpriteCollab, including CHUNSOFT and community contributors. Community contributions use CC BY-NC 4.0; per-species credits are included in `dist/assets/directional`.
-- Overworld trainer sprites and terrain: pret/pokeemerald and pret/pokefirered. Source commits, URLs, hashes, and attribution are included in `dist/assets/world`.
+- Original overworld trainers and terrain: pret/pokeemerald and pret/pokefirered. Source commits, URLs, hashes, and attribution are included in `dist/assets/world`. The additional hidden trainer is original KayMaze pixel art, built locally with `scripts/create-custom-trainer.py`.
 - Additional trainer portraits and credits are included in `dist/assets/trainers`.
 
 Bundled animation and effect modules have recorded SHA-256 checksums. Maze balance, interface, terrain composition, trainer animation timing, and sound synthesis are specific to KayMaze.

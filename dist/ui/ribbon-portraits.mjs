@@ -168,6 +168,12 @@ export const RIBBON_PORTRAITS={
   "x": 0.0,
   "y": -8.0
  },
+ "assets/world/portrait-kayden.png": {
+  "width": 25.6,
+  "height": 51.2,
+  "x": 0.8,
+  "y": -8.0
+ },
  "assets/world/portrait-leaf.png": {
   "width": 26.947,
   "height": 53.895,

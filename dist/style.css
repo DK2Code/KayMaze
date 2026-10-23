@@ -214,3 +214,16 @@ footer{background:#ffffffb8;padding-left:12px;padding-right:12px}
 /* Quiet surfaces keep small captions readable over the valley. */
 .control-line{background:#fffffff0;border-radius:8px;padding:8px 12px}
 .status-line,footer{background:#fffffff0}
+
+/* Optional player identity stays local; trainer art keeps native pixel edges. */
+.name-label{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.name-label span{font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)}
+.player-name-input{display:block;width:100%;min-height:48px;border:1px solid #b9cbe2;border-radius:9px;background:#f8fbff;padding:12px 14px;color:var(--ink);font:inherit;font-size:16px}
+.player-name-input:focus-visible{outline:3px solid #b9d8ff;outline-offset:2px;border-color:var(--blue)}
+.player-name-help{margin:8px 0 0;font-size:12px;line-height:1.6;color:var(--muted)}
+.trainer-discovery{font-size:12px;line-height:1.6;color:#186c95;margin:0 0 12px}
+.trainer-discovery:empty{display:none}
+.trainer-option.hidden-trainer{background:#edfaff;border-color:#91cee9}
+.trainer-option.hidden-trainer.selected{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.trainer-option small{display:block;font-size:9px;line-height:1.5;color:#186c95;margin-top:3px}
+#team-form .selection-check[hidden]{display:none}

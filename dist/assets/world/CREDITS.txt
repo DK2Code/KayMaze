@@ -8,3 +8,5 @@ https://github.com/pret/pokeemerald
 https://github.com/pret/pokefirered
 
 Every source URL, commit and SHA-256 hash is preserved in sources.json. The pack script decodes source metatile references, palette indices, layer order and flips; transparent palette index zero is preserved. Trainer pixels are unaltered, with index zero made transparent. KayMaze composes these tiles into its own procedural mazes.
+
+Kayden: original KayMaze pixel art, authored in scripts/create-custom-trainer.py. Black hair, sky-blue T-shirt, nine directional walking frames; no external source image.

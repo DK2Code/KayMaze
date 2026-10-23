@@ -103,3 +103,6 @@ for name,(repo,path) in trainers.items():
 (ROOT/'dist/world-data.mjs').write_text('export const WORLD_ART = '+json.dumps(metadata,separators=(',',':'))+';\n')
 sources=json.loads((SRC/'sources.json').read_text());(OUT/'sources.json').write_text(json.dumps({'sources':sources,'outputs':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in OUT.glob('*.png')}},indent=2)+'\n')
 (OUT/'CREDITS.txt').write_text('KayMaze overworld art\n\nTrainer sprites and terrain tile artwork: Pokemon Emerald and Pokemon FireRed, sourced from the pret/pokeemerald and pret/pokefirered decompilation projects.\nOriginal artwork belongs to Nintendo, Game Freak, and The Pokemon Company. This is an unofficial noncommercial fan project.\n\nRepository links:\nhttps://github.com/pret/pokeemerald\nhttps://github.com/pret/pokefirered\n\nEvery source URL, commit and SHA-256 hash is preserved in sources.json. The pack script decodes source metatile references, palette indices, layer order and flips; transparent palette index zero is preserved. Trainer pixels are unaltered, with index zero made transparent. KayMaze composes these tiles into its own procedural mazes.\n')
+# Keep the original custom trainer when rebuilding the imported asset family.
+import runpy
+runpy.run_path(str(ROOT / 'scripts/create-custom-trainer.py'), run_name='__main__')

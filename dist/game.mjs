@@ -1,4 +1,4 @@
-import {TRAINERS} from './world-art.mjs';
+import {normalizePlayerName,trainerAvailable,setTrainerProfile} from './profile.mjs';
 import {STARTERS,SPECIES,ROUTES,MODES,OBSTACLES,signature} from './data.mjs';
 export const DIRS=[[0,-1],[1,0],[0,1],[-1,0]];
 export const key=(x,y)=>`${x},${y}`;
@@ -62,7 +62,7 @@ export function tick(g,dt){
 }
 export function medals(g){return (g.status==='won'?1:0)+(g.found===3?1:0);}
 const LEGACY_ROUTE_ORDER=['forest','creek','autumn','cave','frost','volcano','mountain'];
-export function blankSave(){return{version:2,trainer:'red',starter:null,owned:[],unlocked:0,unlockedRoutes:[ROUTES[0].id],records:{},runs:0,mode:'adventure',sound:false,reduced:false,adminUnlocked:false};}
+export function blankSave(){return{version:2,trainer:'red',playerName:'',starter:null,owned:[],unlocked:0,unlockedRoutes:[ROUTES[0].id],records:{},runs:0,mode:'adventure',sound:false,reduced:false,adminUnlocked:false};}
 export function isRouteUnlocked(save,index){return Number.isInteger(index)&&!!ROUTES[index]&&(save.adminUnlocked||save.unlockedRoutes.includes(ROUTES[index].id));}
 export function unlockRoutes(save,ids){
  const unlocked=new Set([ROUTES[0].id,...save.unlockedRoutes,...ids]);
@@ -73,7 +73,8 @@ export function unlockRoutes(save,ids){
 export function collectionIds(save){return [...(save.adminUnlocked?STARTERS:save.starter?[save.starter]:[]),...ROUTES.flatMap(r=>r.rewards)];}
 export function sanitizeSave(raw){
  const s=blankSave();if(!raw||typeof raw!=='object')return s;
- if(Object.hasOwn(TRAINERS,raw.trainer))s.trainer=raw.trainer;
+ s.playerName=normalizePlayerName(raw.playerName);
+ if(trainerAvailable(raw.trainer,s.playerName))s.trainer=raw.trainer;
  s.adminUnlocked=raw.adminUnlocked===true;
  if(STARTERS.includes(raw.starter))s.starter=raw.starter;else if(!s.adminUnlocked)return s;
  const allowed=new Set(collectionIds(s));
@@ -90,6 +91,6 @@ export function sanitizeSave(raw){
  unlockRoutes(s,legacy?order.slice(0,frontier+1):unlocked);
  return s;
 }
-export function chooseStarter(save,id,trainer){if(save.starter!==null||!STARTERS.includes(id)||!Object.hasOwn(TRAINERS,trainer))return false;save.starter=id;save.trainer=trainer;save.owned=save.adminUnlocked?collectionIds(save):[id];return true;}
+export function chooseStarter(save,id,trainer,name=save.playerName){if(save.starter!==null||!STARTERS.includes(id)||!setTrainerProfile(save,trainer,name))return false;save.starter=id;save.owned=save.adminUnlocked?collectionIds(save):[id];return true;}
 export function nextReward(save,routeIndex){const ids=ROUTES[routeIndex].rewards;return ids.find(id=>!save.owned.includes(id))??ids[save.runs%ids.length];}
 export function completeRun(save,g){if(g.status!=='won'||g.recorded)return false;g.recorded=true;if(!save.owned.includes(g.reward))save.owned.push(g.reward);unlockRoutes(save,[ROUTES[g.routeIndex].id,ROUTES[g.routeIndex+1]?.id]);save.runs++;const k=ROUTES[g.routeIndex].id+'-'+g.mode,old=save.records[k];save.records[k]={medals:Math.max(old?.medals||0,medals(g)),time:Math.min(old?.time??Infinity,g.time)};return true;}

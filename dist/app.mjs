@@ -6,6 +6,7 @@ import {Audio} from './audio.mjs';
 import {SAVE_KEY,resetProgress,unlockAdmin} from './progress.mjs';
 import {createExplorerControls,cellAtPoint} from './controls.mjs';
 import {RIBBON_PORTRAITS} from './ui/ribbon-portraits.mjs';
+import {PLAYER_NAME_LIMIT,availableTrainers,hiddenTrainerAvailable,trainerAvailable,playerDisplayName,setTrainerProfile} from './profile.mjs';
 const controls=createExplorerControls();
 const touchMedia=matchMedia('(pointer: coarse), (max-width: 860px)');
 const $=s=>document.querySelector(s),dialog=$('#dialog'),canvas=$('#game'),sound=new Audio(),render=createRenderer(canvas);
@@ -24,8 +25,8 @@ function setRibbonPortrait(image,source){
  if(p){image.style.width=p.width+'px';image.style.height=p.height+'px';image.style.transform=`translate(${p.x}px,${p.y}px)`;}
 }
 function syncProfile(){
- $('#profile-name').textContent=TRAINERS[save.trainer].name;setRibbonPortrait($('#profile-img'),trainerPortrait(save.trainer));
- $('#profile-button').ariaLabel=`Change trainer — ${TRAINERS[save.trainer].name}`;$('#profile-button').title=$('#profile-button').ariaLabel;
+ $('#profile-name').textContent=playerDisplayName(save);setRibbonPortrait($('#profile-img'),trainerPortrait(save.trainer));
+ $('#profile-button').ariaLabel=`Change trainer — ${playerDisplayName(save)}`;$('#profile-button').title=$('#profile-button').ariaLabel;
  $('#collection-count').textContent=save.owned.length;$('#sound-button').innerHTML=icon(save.sound?'volume':'mute');$('#sound-button').ariaLabel=save.sound?'Mute sound':'Turn sound on';$('#sound-button').title=$('#sound-button').ariaLabel;$('#sound-button').setAttribute('aria-pressed',save.sound);
  if(trailPickerOpen)refreshAtlas();
 }
@@ -61,9 +62,29 @@ function closeAtlas(){
  if(!started)return;
  trailPickerOpen=false;clearInput();updateRoute();canvas.focus({preventScroll:true});
 }
-function openSetup(profileOnly=false,initialRoute=0){let chosenTrainer=save.trainer,chosenStarter=save.starter||25;
- const draw=()=>{openDialog(`<div class="modal-body">${modalTop('THE START OF SOMETHING GOOD',profileOnly?'Who’s leading the way?':'Meet your adventure team.',profileOnly?'Your trainer’s look is up to you. Your collection stays with you.':'Choose your trainer and one starter. You’ll meet more Pokémon on the trail.')}<div class="modal-section-label">01 / CHOOSE YOUR TRAINER</div><div class="trainer-options">${Object.entries(TRAINERS).map(([id,t])=>`<button class="trainer-option ${chosenTrainer===id?'selected':''}" data-trainer="${id}" aria-pressed="${chosenTrainer===id}"><img src="${trainerPortrait(id)}" alt="">${t.name}</button>`).join('')}</div>${profileOnly?'':`<div class="modal-section-label">02 / ONE PARTNER. A BIG ADVENTURE.</div><div class="starter-options">${STARTERS.map(id=>`<button class="starter-option ${chosenStarter===id?'selected':''}" data-starter="${id}" aria-pressed="${chosenStarter===id}">${chosenStarter===id?'<span class="selection-check">✓</span>':''}<img src="assets/${id}.png" alt=""><strong>${SPECIES[id].name}</strong><small>${SPECIES[id].type} · ${signature(id).name}</small></button>`).join('')}</div>`}<div class="modal-footer"><p>${profileOnly?'Trainer choice is cosmetic.':'Every starter can clear every maze. Matching moves simply open the way faster.'}</p><button class="primary" id="confirm-team">${profileOnly?'Save trainer':'Start my adventure'} ${icon('arrow')}</button></div></div>`);
- dialog.querySelectorAll('[data-trainer]').forEach(b=>b.onclick=()=>{chosenTrainer=b.dataset.trainer;draw();dialog.querySelector(`[data-trainer="${chosenTrainer}"]`).focus();});dialog.querySelectorAll('[data-starter]').forEach(b=>b.onclick=()=>{chosenStarter=Number(b.dataset.starter);draw();dialog.querySelector(`[data-starter="${chosenStarter}"]`).focus();});$('#confirm-team').onclick=()=>{sound.unlock();if(profileOnly){save.trainer=chosenTrainer;persist();syncProfile();closeDialog();}else if(chooseStarter(save,chosenStarter,chosenTrainer)){activePartner=chosenStarter;if(trailPickerOpen)save.mode=atlasMode;persist();syncProfile();startExpedition(initialRoute);}};};draw();}
+function openSetup(profileOnly=false,initialRoute=0){
+ let chosenTrainer=save.trainer,chosenStarter=save.starter||25,chosenName=save.playerName;
+ openDialog(`<div class="modal-body">${modalTop('THE START OF SOMETHING GOOD',profileOnly?'Who’s leading the way?':'Meet your adventure team.',profileOnly?'Pick your name and trainer. Your collection stays with you.':'Pick a name, choose your trainer, and meet your first Pokémon.')}<form id="team-form"><label class="modal-section-label name-label" for="player-name">01 / YOUR NAME <span>Optional</span></label><input class="player-name-input" id="player-name" name="playerName" type="text" maxlength="${PLAYER_NAME_LIMIT}" autocomplete="off" autocapitalize="words" spellcheck="false" aria-describedby="player-name-help"><p class="player-name-help" id="player-name-help"></p><div class="modal-section-label">02 / CHOOSE YOUR TRAINER</div><p class="trainer-discovery" id="trainer-discovery" role="status" aria-live="polite"></p><div class="trainer-options" aria-label="Trainer choices"></div>${profileOnly?'':`<div class="modal-section-label">03 / ONE PARTNER. A BIG ADVENTURE.</div><div class="starter-options">${STARTERS.map(id=>`<button type="button" class="starter-option ${chosenStarter===id?'selected':''}" data-starter="${id}" aria-pressed="${chosenStarter===id}"><span class="selection-check" ${chosenStarter===id?'':'hidden'}>✓</span><img src="assets/${id}.png" alt=""><strong>${SPECIES[id].name}</strong><small>${SPECIES[id].type} · ${signature(id).name}</small></button>`).join('')}</div>`}<div class="modal-footer"><p>${profileOnly?'Your name saves only in this browser.':'Every starter can clear every maze. Your name saves only in this browser.'}</p><button type="submit" class="primary" id="confirm-team">${profileOnly?'Save trainer':'Start my adventure'} ${icon('arrow')}</button></div></form></div>`);
+ const input=$('#player-name'),list=dialog.querySelector('.trainer-options');input.value=chosenName;
+ const drawTrainers=()=>{
+  if(!trainerAvailable(chosenTrainer,chosenName))chosenTrainer='red';
+  input.placeholder=TRAINERS[chosenTrainer].name;
+  $('#player-name-help').textContent=TRAINERS[chosenTrainer].hidden?'Keep Kayden as your name to use this trainer.':`Leave blank to use ${TRAINERS[chosenTrainer].name}.`;
+  $('#trainer-discovery').textContent=hiddenTrainerAvailable(chosenName)?'A hidden trainer appeared! Kayden is ready to join you.':'';
+  list.innerHTML=availableTrainers(chosenName).map(([id,t])=>`<button type="button" class="trainer-option ${chosenTrainer===id?'selected':''} ${t.hidden?'hidden-trainer':''}" data-trainer="${id}" aria-pressed="${chosenTrainer===id}"><img src="${trainerPortrait(id)}" alt=""><span>${t.name}</span>${t.hidden?'<small>Discovered!</small>':''}</button>`).join('');
+  list.querySelectorAll('[data-trainer]').forEach(b=>b.onclick=()=>{chosenTrainer=b.dataset.trainer;drawTrainers();list.querySelector(`[data-trainer="${chosenTrainer}"]`).focus({preventScroll:true});});
+ };
+ input.addEventListener('input',()=>{chosenName=input.value;drawTrainers();});drawTrainers();
+ dialog.querySelectorAll('[data-starter]').forEach(b=>b.onclick=()=>{
+  chosenStarter=Number(b.dataset.starter);
+  dialog.querySelectorAll('[data-starter]').forEach(option=>{const selected=Number(option.dataset.starter)===chosenStarter;option.classList.toggle('selected',selected);option.setAttribute('aria-pressed',String(selected));option.querySelector('.selection-check').hidden=!selected;});
+ });
+ $('#team-form').onsubmit=e=>{
+  e.preventDefault();sound.unlock();
+  if(profileOnly){if(setTrainerProfile(save,chosenTrainer,chosenName)){persist();syncProfile();closeDialog();}}
+  else if(chooseStarter(save,chosenStarter,chosenTrainer,chosenName)){activePartner=chosenStarter;if(trailPickerOpen)save.mode=atlasMode;persist();syncProfile();startExpedition(initialRoute);}
+ };
+}
 function openAtlas(initialRoute=routeIndex){
  closeJournal();if(dialog.open){modalReturnFocus=$('#atlas-button');closeDialog();}clearInput();sound.stop();
  atlasSelection=isRouteUnlocked(save,initialRoute)?initialRoute:routeIndex;atlasMode=save.mode;trailPickerOpen=true;
@@ -73,6 +94,7 @@ function openAtlas(initialRoute=routeIndex){
   <div class="route-options">${ROUTES.map((r,i)=>`<button class="route-option ${atlasSelection===i?'selected':''}" data-route="${i}" ${!isRouteUnlocked(save,i)?'disabled':''} aria-pressed="${atlasSelection===i}" aria-label="${r.name}${!isRouteUnlocked(save,i)?' — locked':''}"><span class="route-number">TRAIL 0${i+1}</span><span class="route-lock">${!isRouteUnlocked(save,i)?icon('lock'):atlasSelection===i?icon('check'):'OPEN'}</span><canvas class="route-preview" data-route-preview="${i}" aria-hidden="true"></canvas><h3>${r.name}</h3><p>${!isRouteUnlocked(save,i)?'Catch a friend on the previous trail to unlock.':r.description}</p></button>`).join('')}</div>
   <div class="picker-footer"><div class="picker-pace"><span class="modal-section-label">SET YOUR PACE</span><div class="mode-options">${Object.entries(MODES).map(([id,m])=>`<button class="mode-option ${atlasMode===id?'selected':''}" data-mode="${id}" aria-pressed="${atlasMode===id}">${m.name}</button>`).join('')}</div><p class="mode-explanation">${MODES[atlasMode].description}</p></div><div class="picker-start">${started?'<button class="secondary" id="cancel-trail">Back to current trail</button>':''}<button class="primary" id="start-trail">${save.starter?'Explore this trail':'Choose my team'} ${icon('arrow')}</button></div>${started?'<p class="picker-warning">Starting a trail replaces this expedition. Your collection and records stay saved.</p>':''}</div>`;
   const picker=$('#trail-picker');picker.querySelector('.route-options').scrollTop=scrollTop;
+  if(save.starter)picker.querySelector('.picker-intro p').textContent=`Pick a trail and your pace. Your team is ready, ${playerDisplayName(save)}.`;
   picker.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{atlasSelection=Number(b.dataset.route);draw();picker.querySelector(`[data-route="${atlasSelection}"]`).focus({preventScroll:true});});
   picker.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{atlasMode=b.dataset.mode;draw();picker.querySelector(`[data-mode="${atlasMode}"]`).focus({preventScroll:true});});
   const previews=[...picker.querySelectorAll('[data-route-preview]')];loadWorldArt().then(()=>previews.filter(c=>c.isConnected).forEach(c=>{const i=Number(c.dataset.routePreview);renderTrailPreview(c,createMaze(i,'relaxed',4587,25,ROUTES[i].rewards[0]),ROUTES[i].id);})).catch(()=>{});

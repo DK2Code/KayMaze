@@ -44,7 +44,7 @@ test('all seven terrain renderers and trainers draw within loaded PNG bounds',as
 });
 
 test('trainer choices and legacy Cinnabar completion retain all trail access',()=>{
- for(const id of Object.keys(TRAINERS)){const save=blankSave();assert.ok(chooseStarter(save,25,id));assert.equal(sanitizeSave(save).trainer,id);}
+ for(const id of Object.keys(TRAINERS)){const save=blankSave();assert.ok(chooseStarter(save,25,id,TRAINERS[id].hidden?'Kayden':''));assert.equal(sanitizeSave(save).trainer,id);}
  const old={...blankSave(),version:1,starter:25,trainer:'leaf',owned:[25,10,6],unlocked:5,records:{'volcano-adventure':{medals:3,time:240}}};
  const loaded=sanitizeSave(old);assert.deepEqual(loaded.records,old.records);assert.deepEqual(loaded.owned,old.owned);assert.equal(loaded.trainer,'leaf');assert.equal(loaded.unlocked,6);
  const mountain=createMaze(ROUTES.findIndex(r=>r.id==='mountain'),'adventure',42,25,27);mountain.status='won';assert.ok(completeRun(loaded,mountain));assert.equal(loaded.unlocked,6);assert.ok(loaded.owned.includes(27));

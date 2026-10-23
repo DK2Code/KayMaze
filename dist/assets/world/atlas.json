@@ -94,5 +94,11 @@
     "width": 16,
     "height": 32,
     "frames": 9
+  },
+  "trainer-kayden": {
+    "file": "trainer-kayden.png",
+    "width": 16,
+    "height": 32,
+    "frames": 9
   }
 }

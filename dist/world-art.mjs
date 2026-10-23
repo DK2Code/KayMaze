@@ -1,7 +1,7 @@
 import {WORLD_ART} from './world-data.mjs';
 import {TRAINERS as ARENA_TRAINERS} from './arena/trainers.mjs';
 
-export const TRAINERS=Object.freeze({...ARENA_TRAINERS,brendan:{name:'Brendan',color:'#87c58b'},may:{name:'May',color:'#dc806f'}});
+export const TRAINERS=Object.freeze({...ARENA_TRAINERS,brendan:{name:'Brendan',color:'#87c58b'},may:{name:'May',color:'#dc806f'},kayden:{name:'Kayden',color:'#72c7ed',hidden:true}});
 export const trainerPortrait=id=>`assets/world/portrait-${Object.hasOwn(TRAINERS,id)?id:'red'}.png`;
 const images=new Map();let promise,revision=0;
 export function loadWorldArt(){return promise??=Promise.all(Object.entries(WORLD_ART).map(([id,meta])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{images.set(id,image);resolve();};image.onerror=()=>reject(Error(`Unable to load ${meta.file}`));image.src=`assets/world/${meta.file}`;}))).then(()=>{revision++;});}
