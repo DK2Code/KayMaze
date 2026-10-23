@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="description" content="Take the scenic route. A Pokémon maze adventure full of winding trails, playful obstacles, and new friends."><title>KayMaze · Wander into wonder.</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"></head>
+<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="description" content="Take the scenic route. A Pokémon maze adventure full of winding trails, playful obstacles, and new friends."><title>KayMaze · Wander into wonder.</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=b8bdd166507c"></head>
 <body>
 <a class="skip-link" href="#main">Skip to adventure</a>
 <header class="site-header"><a class="brand" href="./" aria-label="KayMaze home"><img class="brand-ball" src="ui/pokeball.svg" alt="" width="44" height="44"><span>Kay<span>Maze</span></span></a><nav aria-label="Game navigation"><button class="nav-button active" id="explore-nav" aria-current="page">Explore</button><button class="nav-button" id="collection-button">Collection <span class="count" id="collection-count">0</span></button><button class="nav-button" id="guide-button">Field guide</button></nav><div class="header-tools"><button class="icon-button" id="sound-button" title="Turn sound on" aria-label="Turn sound on" aria-pressed="false"><span data-icon="mute"></span></button></div></header>
@@ -14,11 +14,8 @@
 <div class="control-line"><div><span class="pointer-guidance" id="pointer-guidance"><span data-icon="pointer"></span> Click or tap a path to walk · an obstacle to clear it</span><span class="keyboard-help"><kbd>WASD</kbd> / <kbd>↑ ↓ ← →</kbd> Move <kbd>SPACE</kbd> Attack</span></div><span class="autosave"><i></i> Collection saves automatically</span></div>
 </div>
 </section>
-
-
-<div class="status-line" id="status-line" role="status" aria-live="polite"><span data-icon="compass"></span><span id="status-text">Welcome to KayMaze. Your next little adventure starts here.</span></div>
-<footer><span class="footer-brand">Kay<span>Maze</span><small>Made for the joy of exploring.</small></span><button id="credits-button">An unofficial Pokémon fan adventure <span>↗</span></button></footer>
+<div class="sr-only" id="game-announcement" role="status" aria-live="polite" aria-atomic="true"></div>
 </main>
 <dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
-<script type="module" src="app.mjs"></script>
+<script type="module" src="app.mjs?v=dd17677a1878"></script>
 </body></html>
