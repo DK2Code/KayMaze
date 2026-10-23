@@ -1,4 +1,4 @@
-import {blankSave,collectionIds} from './game.mjs';
+import {blankSave,collectionIds,unlockRoutes} from './game.mjs';
 import {ROUTES} from './data.mjs';
 
 export const SAVE_KEY='kaymaze-expedition-v1';
@@ -8,7 +8,7 @@ export function unlockAdmin(save,password){
  if(password!=='1234')return false;
  save.adminUnlocked=true;
  save.owned=collectionIds(save);
- save.unlocked=ROUTES.length-1;
+ unlockRoutes(save,ROUTES.map(r=>r.id));
  return true;
 }
 

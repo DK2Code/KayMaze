@@ -43,10 +43,9 @@ test('all seven terrain renderers and trainers draw within loaded PNG bounds',as
  }finally{if(OriginalImage)globalThis.Image=OriginalImage;else delete globalThis.Image;}
 });
 
-test('new trainer choices and the appended mountain trail preserve existing progress',()=>{
+test('trainer choices and legacy Cinnabar completion retain all trail access',()=>{
  for(const id of Object.keys(TRAINERS)){const save=blankSave();assert.ok(chooseStarter(save,25,id));assert.equal(sanitizeSave(save).trainer,id);}
- assert.deepEqual(ROUTES.slice(0,6).map(r=>r.id),['forest','creek','autumn','cave','frost','volcano']);
- const old={...blankSave(),starter:25,trainer:'leaf',owned:[25,10,6],unlocked:5,records:{'volcano-adventure':{medals:3,time:240}}};
+ const old={...blankSave(),version:1,starter:25,trainer:'leaf',owned:[25,10,6],unlocked:5,records:{'volcano-adventure':{medals:3,time:240}}};
  const loaded=sanitizeSave(old);assert.deepEqual(loaded.records,old.records);assert.deepEqual(loaded.owned,old.owned);assert.equal(loaded.trainer,'leaf');assert.equal(loaded.unlocked,6);
- const mountain=createMaze(6,'adventure',42,25,27);mountain.status='won';assert.ok(completeRun(loaded,mountain));assert.equal(loaded.unlocked,6);assert.ok(loaded.owned.includes(27));
+ const mountain=createMaze(ROUTES.findIndex(r=>r.id==='mountain'),'adventure',42,25,27);mountain.status='won';assert.ok(completeRun(loaded,mountain));assert.equal(loaded.unlocked,6);assert.ok(loaded.owned.includes(27));
 });

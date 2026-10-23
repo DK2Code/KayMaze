@@ -6,6 +6,8 @@ A browser maze adventure with eight trainers, four possible starters, seven repl
 
 ## How to play
 
+Granite Highlands is Trail 01, followed by Cerulean Creek, Amberwood Trail, Moonlit Cavern, Frostfall Hollow, Cinnabar Wilds, and Viridian Forest as Trail 07. Returning players retain access to previously unlocked trails, their collection, and their records.
+
 - Choose your trainer, starting Pokémon, and trail.
 - Click or tap a reachable path to walk. Your partner follows behind you.
 - Click or tap an obstacle to approach it and attack automatically. Choosing another destination or opening a menu cancels the action.

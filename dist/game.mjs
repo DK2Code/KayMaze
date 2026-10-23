@@ -9,7 +9,7 @@ export function pathfind(g,from,to,ignoreObstacles=false){
  for(let i=0;i<queue.length;i++){const p=queue[i];if(eq(p,to)){last=p;break;}for(const [dx,dy]of DIRS){const n={x:p.x+dx,y:p.y+dy},k=key(n.x,n.y);if(seen.has(k)||g.grid[n.y]?.[n.x]!==0||(!ignoreObstacles&&g.obstacles?.get(k)?.hp>0))continue;seen.set(k,p);queue.push(n);}}
  if(!last)return[];const path=[];while(last&&!eq(last,from)){path.unshift(last);last=seen.get(key(last.x,last.y));}return path;
 }
-export function createMaze(routeIndex=0,mode='adventure',seed=1,partner=25,reward=10){
+export function createMaze(routeIndex=0,mode='adventure',seed=1,partner=25,reward=ROUTES[routeIndex].rewards[0]){
  const cfg=MODES[mode],random=rng(seed),w=cfg.width,h=cfg.height,grid=Array.from({length:h},()=>Array(w).fill(1)),stack=[{x:1,y:1}];grid[1][1]=0;
  while(stack.length){const p=stack.at(-1),choices=DIRS.map(([dx,dy])=>({x:p.x+dx*2,y:p.y+dy*2,dx,dy})).filter(n=>n.x>0&&n.y>0&&n.x<w-1&&n.y<h-1&&grid[n.y][n.x]===1);if(!choices.length){stack.pop();continue;}const n=choices[Math.floor(random()*choices.length)];grid[p.y+n.dy][p.x+n.dx]=0;grid[n.y][n.x]=0;stack.push(n);}
  // A few loops create route choices without erasing the maze's dead ends.
@@ -61,7 +61,15 @@ export function tick(g,dt){
  if(!g.step&&!g.walkPath.length&&g.walkTarget){const t=g.walkTarget;if(Math.abs(t.x-g.player.x)+Math.abs(t.y-g.player.y)===1){g.facing=DIRS.findIndex(([dx,dy])=>g.player.x+dx===t.x&&g.player.y+dy===t.y);notify(g,'You’re in range · your partner is ready to clear the obstacle.');}g.walkTarget=null;}
 }
 export function medals(g){return (g.status==='won'?1:0)+(g.found===3?1:0);}
-export function blankSave(){return{version:1,trainer:'red',starter:null,owned:[],unlocked:0,records:{},runs:0,mode:'adventure',sound:false,reduced:false,adminUnlocked:false};}
+const LEGACY_ROUTE_ORDER=['forest','creek','autumn','cave','frost','volcano','mountain'];
+export function blankSave(){return{version:2,trainer:'red',starter:null,owned:[],unlocked:0,unlockedRoutes:[ROUTES[0].id],records:{},runs:0,mode:'adventure',sound:false,reduced:false,adminUnlocked:false};}
+export function isRouteUnlocked(save,index){return Number.isInteger(index)&&!!ROUTES[index]&&(save.adminUnlocked||save.unlockedRoutes.includes(ROUTES[index].id));}
+export function unlockRoutes(save,ids){
+ const unlocked=new Set([ROUTES[0].id,...save.unlockedRoutes,...ids]);
+ save.unlockedRoutes=ROUTES.filter(r=>save.adminUnlocked||unlocked.has(r.id)).map(r=>r.id);
+ // Retain the contiguous frontier for compatibility; access uses stable route IDs.
+ save.unlocked=0;while(save.unlocked<ROUTES.length-1&&save.unlockedRoutes.includes(ROUTES[save.unlocked+1].id))save.unlocked++;
+}
 export function collectionIds(save){return [...(save.adminUnlocked?STARTERS:save.starter?[save.starter]:[]),...ROUTES.flatMap(r=>r.rewards)];}
 export function sanitizeSave(raw){
  const s=blankSave();if(!raw||typeof raw!=='object')return s;
@@ -70,15 +78,18 @@ export function sanitizeSave(raw){
  if(STARTERS.includes(raw.starter))s.starter=raw.starter;else if(!s.adminUnlocked)return s;
  const allowed=new Set(collectionIds(s));
  s.owned=s.adminUnlocked?[...allowed]:[...new Set([s.starter,...(Array.isArray(raw.owned)?raw.owned:[]).filter(id=>allowed.has(id))])];
- s.unlocked=s.adminUnlocked?ROUTES.length-1:Number.isInteger(raw.unlocked)?Math.max(0,Math.min(ROUTES.length-1,raw.unlocked)):0;
+ const legacy=raw.version!==2,order=legacy?LEGACY_ROUTE_ORDER:ROUTES.map(r=>r.id);
+ let frontier=Number.isInteger(raw.unlocked)?Math.max(0,Math.min(order.length-1,raw.unlocked)):0;
+ const unlocked=Array.isArray(raw.unlockedRoutes)?raw.unlockedRoutes.filter(id=>order.includes(id)):order.slice(0,frontier+1);
  s.runs=Number.isInteger(raw.runs)?Math.max(0,Math.min(1e7,raw.runs)):0;
  s.mode=Object.hasOwn(MODES,raw.mode)?raw.mode:'adventure';s.sound=raw.sound===true;s.reduced=raw.reduced===true;
  if(raw.records&&typeof raw.records==='object')for(const r of ROUTES)for(const m of Object.keys(MODES)){
   const k=r.id+'-'+m,v=raw.records[k];
-  if(v&&Number.isFinite(v.time)&&v.time>=0&&Number.isInteger(v.medals)&&v.medals>=1&&v.medals<=3){s.records[k]={time:v.time,medals:v.medals};s.unlocked=Math.max(s.unlocked,Math.min(ROUTES.length-1,ROUTES.indexOf(r)+1));}
+  if(v&&Number.isFinite(v.time)&&v.time>=0&&Number.isInteger(v.medals)&&v.medals>=1&&v.medals<=3){s.records[k]={time:v.time,medals:v.medals};const next=order.indexOf(r.id)+1;if(legacy)frontier=Math.max(frontier,Math.min(order.length-1,next));else unlocked.push(r.id,order[next]);}
  }
+ unlockRoutes(s,legacy?order.slice(0,frontier+1):unlocked);
  return s;
 }
 export function chooseStarter(save,id,trainer){if(save.starter!==null||!STARTERS.includes(id)||!Object.hasOwn(TRAINERS,trainer))return false;save.starter=id;save.trainer=trainer;save.owned=save.adminUnlocked?collectionIds(save):[id];return true;}
 export function nextReward(save,routeIndex){const ids=ROUTES[routeIndex].rewards;return ids.find(id=>!save.owned.includes(id))??ids[save.runs%ids.length];}
-export function completeRun(save,g){if(g.status!=='won'||g.recorded)return false;g.recorded=true;if(!save.owned.includes(g.reward))save.owned.push(g.reward);save.unlocked=Math.min(ROUTES.length-1,Math.max(save.unlocked,g.routeIndex+1));save.runs++;const k=ROUTES[g.routeIndex].id+'-'+g.mode,old=save.records[k];save.records[k]={medals:Math.max(old?.medals||0,medals(g)),time:Math.min(old?.time??Infinity,g.time)};return true;}
+export function completeRun(save,g){if(g.status!=='won'||g.recorded)return false;g.recorded=true;if(!save.owned.includes(g.reward))save.owned.push(g.reward);unlockRoutes(save,[ROUTES[g.routeIndex].id,ROUTES[g.routeIndex+1]?.id]);save.runs++;const k=ROUTES[g.routeIndex].id+'-'+g.mode,old=save.records[k];save.records[k]={medals:Math.max(old?.medals||0,medals(g)),time:Math.min(old?.time??Infinity,g.time)};return true;}
