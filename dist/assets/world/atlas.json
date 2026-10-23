@@ -1,0 +1,98 @@
+{
+  "outdoors": {
+    "file": "outdoors.png",
+    "tileSize": 16,
+    "columns": 16,
+    "count": 512
+  },
+  "cavern": {
+    "file": "cavern.png",
+    "tileSize": 16,
+    "columns": 16,
+    "count": 414
+  },
+  "frozen": {
+    "file": "frozen.png",
+    "tileSize": 16,
+    "columns": 16,
+    "count": 248
+  },
+  "forest-tree": {
+    "file": "forest-tree.png",
+    "width": 32,
+    "height": 48
+  },
+  "obstacle-tree": {
+    "file": "obstacle-tree.png",
+    "width": 32,
+    "height": 48
+  },
+  "obstacle-rock": {
+    "file": "obstacle-rock.png",
+    "width": 16,
+    "height": 16
+  },
+  "obstacle-thorns": {
+    "file": "obstacle-thorns.png",
+    "width": 16,
+    "height": 16
+  },
+  "obstacle-crystal": {
+    "file": "obstacle-crystal.png",
+    "width": 24,
+    "height": 24
+  },
+  "obstacle-ice": {
+    "file": "obstacle-ice.png",
+    "width": 16,
+    "height": 16
+  },
+  "trainer-red": {
+    "file": "trainer-red.png",
+    "width": 16,
+    "height": 32,
+    "frames": 9
+  },
+  "trainer-leaf": {
+    "file": "trainer-leaf.png",
+    "width": 16,
+    "height": 32,
+    "frames": 9
+  },
+  "trainer-blue": {
+    "file": "trainer-blue.png",
+    "width": 16,
+    "height": 32,
+    "frames": 9
+  },
+  "trainer-misty": {
+    "file": "trainer-misty.png",
+    "width": 16,
+    "height": 32,
+    "frames": 3
+  },
+  "trainer-brock": {
+    "file": "trainer-brock.png",
+    "width": 16,
+    "height": 32,
+    "frames": 3
+  },
+  "trainer-sabrina": {
+    "file": "trainer-sabrina.png",
+    "width": 16,
+    "height": 32,
+    "frames": 3
+  },
+  "trainer-brendan": {
+    "file": "trainer-brendan.png",
+    "width": 16,
+    "height": 32,
+    "frames": 9
+  },
+  "trainer-may": {
+    "file": "trainer-may.png",
+    "width": 16,
+    "height": 32,
+    "frames": 9
+  }
+}

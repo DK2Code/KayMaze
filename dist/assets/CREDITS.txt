@@ -1,0 +1,19 @@
+KayMaze asset sources
+
+Pokemon portraits and fallback animations:
+https://github.com/PokeAPI/sprites
+Generation V Black/White front sprites. Character art belongs to Nintendo,
+Game Freak and The Pokemon Company.
+
+Species names, current types, base stats and move learnsets:
+https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv
+Species-specific moves are based on Ultra Sun / Ultra Moon learnsets,
+including moves retained from a pre-evolution. Obstacle damage and effects
+are game-specific adaptations rather than main-series battle rules.
+
+Directional battle sprites and centered head portraits:
+https://github.com/PMDCollab/SpriteCollab
+See assets/directional/CREDITS.txt, LICENSE.md, credit_names.txt and the
+per-species histories in assets/directional.
+
+Included for this unofficial noncommercial fan game.

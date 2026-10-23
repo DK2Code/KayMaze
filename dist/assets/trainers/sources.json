@@ -1,0 +1,76 @@
+{
+  "repository": "https://github.com/pret/pokefirered",
+  "commit": "037335f4c725d7c9aecdac87066f2002b4bd7e14",
+  "files": [
+    {
+      "file": "red.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/front_pics/red_front_pic.png",
+      "sha256": "4442795842373b5045041f7207619799160edcc9e0124e19996e46401ed149f0",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "leaf.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/front_pics/leaf_front_pic.png",
+      "sha256": "54dc10d0408c2e064b4f192891a32e499dafa611875f875ba41f51ad45deec71",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "blue.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/front_pics/rival_late_front_pic.png",
+      "sha256": "d93fbdd519ad959f6f24201567e04748d37d9095b366eacb9039f521ef4dba5a",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "misty.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/front_pics/leader_misty_front_pic.png",
+      "sha256": "d05c808ba42fbcb036c3e2789d3876d7ca1c5f3733aeb71cc596a2a42a59a77b",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "brock.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/front_pics/leader_brock_front_pic.png",
+      "sha256": "3972bbf25feefb2f254201dfd9f04064c631cfb25876f424af077600eceff7ea",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "sabrina.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/front_pics/leader_sabrina_front_pic.png",
+      "sha256": "10ab8f1a43886c45d489f13a0de6f1f7e91aa11a82d440d7d9a7ecb0cbd2967b",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "red-throw.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/back_pics/red_back_pic.png",
+      "sha256": "cd56e9c887a82cf0f95e357eacf9fc7bbeace7f4635e8fe2da2da037830287e9",
+      "width": 64,
+      "height": 320
+    },
+    {
+      "file": "leaf-throw.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/trainers/back_pics/leaf_back_pic.png",
+      "sha256": "122b170c9823b4d66f5bf41bd05ce5c242ccca124abb2d474987b11435801da5",
+      "width": 64,
+      "height": 320
+    },
+    {
+      "file": "pokeball.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/battle_anims/sprites/pokeball.png",
+      "sha256": "142da6fe05e9a4ad68948e9eff6cd2bb75040aece6447b3777e524ffa37a3f96",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "file": "pokeball-icon.png",
+      "source": "https://raw.githubusercontent.com/pret/pokefirered/037335f4c725d7c9aecdac87066f2002b4bd7e14/graphics/items/icons/poke_ball.png",
+      "sha256": "d2676faca26163d59bab3580b4135735007fd45be26585610d3e0f12d967f0e8",
+      "width": 24,
+      "height": 24
+    }
+  ]
+}

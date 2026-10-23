@@ -1,0 +1,10 @@
+KayMaze overworld art
+
+Trainer sprites and terrain tile artwork: Pokemon Emerald and Pokemon FireRed, sourced from the pret/pokeemerald and pret/pokefirered decompilation projects.
+Original artwork belongs to Nintendo, Game Freak, and The Pokemon Company. This is an unofficial noncommercial fan project.
+
+Repository links:
+https://github.com/pret/pokeemerald
+https://github.com/pret/pokefirered
+
+Every source URL, commit and SHA-256 hash is preserved in sources.json. The pack script decodes source metatile references, palette indices, layer order and flips; transparent palette index zero is preserved. Trainer pixels are unaltered, with index zero made transparent. KayMaze composes these tiles into its own procedural mazes.

@@ -1,0 +1,8 @@
+// Optional, local synthesis. Every note starts only after a user gesture.
+export class Audio {
+ constructor(){this.enabled=false;this.context=null;this.nodes=new Set();}
+ unlock(){try{this.context??=new (window.AudioContext||window.webkitAudioContext)();this.context.resume().catch(()=>{});}catch{}}
+ stop(){for(const n of this.nodes){try{n.stop();}catch{}}this.nodes.clear();}
+ tone(frequency,time=.1,delay=0,type='sine',volume=.055,end=frequency){if(!this.enabled||!this.context||this.context.state!=='running')return;try{const ctx=this.context,t=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,t);osc.frequency.exponentialRampToValueAtTime(Math.max(30,end),t+time);gain.gain.setValueAtTime(.001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.012);gain.gain.exponentialRampToValueAtTime(.001,t+time);osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+time+.02);this.nodes.add(osc);osc.onended=()=>this.nodes.delete(osc);}catch{}}
+ play(type,element){if(type==='attack'){const f={fire:180,water:640,electric:1100,grass:420,rock:95,ice:890,bug:350,flying:580,normal:230,dragon:160}[element]||340;this.tone(f,.16,0,element==='electric'?'sawtooth':element==='fire'?'triangle':'sine',.04,f*.45);this.tone(f*1.7,.1,.06,'sine',.025,f*.8);}else if(type==='star') [660,880,1320].forEach((f,i)=>this.tone(f,.14,i*.08));else if(type==='capture')[440,554,660,880].forEach((f,i)=>this.tone(f,.22,i*.12));else if(type==='caught')[523,659,784,1046].forEach((f,i)=>this.tone(f,.4,i*.12));else if(type==='switch'){this.tone(500,.2,0,'sine',.05,1000);}}
+}

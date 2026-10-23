@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.png binary
+# Imported renderer files must retain their recorded byte-for-byte checksums.
+dist/arena/** -text

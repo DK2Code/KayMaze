@@ -1,0 +1,11 @@
+{
+  "name": "kaymaze",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "node --test tests/controls.test.mjs tests/game.test.mjs tests/assets.test.mjs tests/render.test.mjs tests/world-art.test.mjs tests/progress.test.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}
