@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SAVE_KEY,resetProgress,unlockAdmin} from '../dist/progress.mjs';
+import {SAVE_KEY,resetProgress,unlockAdmin,lockAdmin} from '../dist/progress.mjs';
 import {blankSave,sanitizeSave,chooseStarter,collectionIds,createMaze,switchPartner,completeRun,nextReward,isRouteUnlocked} from '../dist/game.mjs';
 import {STARTERS,SPECIES,ROUTES,MODES} from '../dist/data.mjs';
 
@@ -28,7 +28,7 @@ test('only the exact admin password unlocks content and wrong attempts never mut
  assert.equal(unlockAdmin(save,'1234'),true);
  assert.equal(save.adminUnlocked,true);assert.equal(save.unlocked,ROUTES.length-1);
  assert.deepEqual(new Set(save.owned),new Set(Object.values(SPECIES).map(p=>p.id)));
- assert.equal(save.owned.length,25);assert.equal(save.starter,7);assert.equal(save.trainer,'may');
+ assert.equal(save.owned.length,Object.keys(SPECIES).length);assert.equal(save.starter,7);assert.equal(save.trainer,'may');
  assert.deepEqual(save.records,before.records);assert.equal(save.runs,before.runs);
  assert.deepEqual(sanitizeSave(JSON.parse(JSON.stringify(save))),save);
  assert.equal(chooseStarter(save,25,'red'),false);
@@ -39,9 +39,9 @@ test('admin unlock works before team selection and survives choosing any starter
  for(const starter of STARTERS){
   let save=blankSave();assert.equal(unlockAdmin(save,'1234'),true);
   save=sanitizeSave(JSON.parse(JSON.stringify(save)));
-  assert.equal(save.starter,null);assert.equal(save.owned.length,25);
+  assert.equal(save.starter,null);assert.equal(save.owned.length,Object.keys(SPECIES).length);
   assert.equal(chooseStarter(save,starter,'brendan'),true);
-  assert.equal(save.starter,starter);assert.equal(save.owned.length,25);
+  assert.equal(save.starter,starter);assert.equal(save.owned.length,Object.keys(SPECIES).length);
   assert.equal(save.unlocked,ROUTES.length-1);assert.deepEqual(sanitizeSave(save),save);
  }
 });
@@ -53,7 +53,7 @@ test('admin roster can use every partner, route, and mode while catches still wo
   assert.equal(switchPartner(g,id,save.owned),true);assert.equal(g.partner,id);
  }
  const mountain=ROUTES.findIndex(r=>r.id==='mountain');const g=createMaze(mountain,'expert',84,6,nextReward(save,mountain));g.status='won';
- assert.equal(completeRun(save,g),true);assert.equal(save.owned.length,25);
+ assert.equal(completeRun(save,g),true);assert.equal(save.owned.length,Object.keys(SPECIES).length);
  assert.equal(save.unlocked,ROUTES.length-1);assert.equal(save.runs,1);
  assert.ok(save.records['mountain-expert']);assert.equal(completeRun(save,g),false);
 });
@@ -62,7 +62,7 @@ test('ordinary saves retain exclusive starters and nonboolean admin flags do not
  for(const flag of [undefined,false,'true','1234',1]){
   const save=sanitizeSave({...blankSave(),starter:4,owned:[1,4,7,25,10],adminUnlocked:flag});
   assert.equal(save.adminUnlocked,false);assert.deepEqual(save.owned,[4,10]);
-  assert.equal(save.unlocked,0);assert.equal(collectionIds(save).length,22);
+  assert.equal(save.unlocked,0);assert.equal(collectionIds(save).length,Object.keys(SPECIES).length-STARTERS.length+1);
  }
 });
 
@@ -115,4 +115,73 @@ test('current saves validate route IDs and retain only valid completion-based un
  for(const index of [-1,7,NaN,'0',null])assert.equal(isRouteUnlocked(save,index),false);
  const legacy=sanitizeSave({version:1,starter:25,unlocked:0,records:{'mountain-expert':{time:60,medals:2}}});
  assert.equal(legacy.unlockedRoutes.length,7);
+});
+
+test('locking admin restores earned progress across reloads and can be unlocked again',()=>{
+ let save=blankSave();chooseStarter(save,7,'may','Explorer');
+ const run=createMaze(0,'adventure',84,7,nextReward(save,0));run.status='won';completeRun(save,run);
+ save.sound=true;save.reduced=true;save.mode='expert';
+ const earned=structuredClone(save);
+ assert.equal(lockAdmin(save),false);assert.deepEqual(save,earned);
+ unlockAdmin(save,'1234');
+ save=sanitizeSave(JSON.parse(JSON.stringify(save)));
+ unlockAdmin(save,'1234');
+ assert.equal(lockAdmin(save),true);assert.deepEqual(save,earned);
+ save=sanitizeSave(JSON.parse(JSON.stringify(save)));assert.deepEqual(save,earned);
+ assert.equal(unlockAdmin(save,'wrong'),false);assert.deepEqual(save,earned);
+ assert.equal(unlockAdmin(save,'1234'),true);assert.ok(save.owned.includes(151));
+ lockAdmin(save);assert.deepEqual(save,earned);
+});
+
+test('locking after admin team selection retains only the selected starter',()=>{
+ for(const starter of STARTERS){
+  let save=blankSave();unlockAdmin(save,'1234');chooseStarter(save,starter,'red');
+  save=sanitizeSave(JSON.parse(JSON.stringify(save)));lockAdmin(save);
+  assert.deepEqual(save.owned,[starter]);assert.deepEqual(save.unlockedRoutes,['mountain']);
+  assert.equal(save.adminProgress,null);assert.equal(save.adminUnlocked,false);
+ }
+ const empty=blankSave();unlockAdmin(empty,'1234');lockAdmin(empty);assert.deepEqual(empty,blankSave());
+});
+
+test('real catches during admin testing survive re-lock without keeping borrowed companions',()=>{
+ let save=blankSave();chooseStarter(save,1,'leaf');unlockAdmin(save,'1234');
+ const first=nextReward(save,0);assert.equal(first,27);
+ const run=createMaze(0,'expert',84,151,first);run.status='won';run.time=42;completeRun(save,run);
+ assert.equal(nextReward(save,0),66);assert.equal(completeRun(save,run),false);
+ save=sanitizeSave(JSON.parse(JSON.stringify(save)));lockAdmin(save);
+ assert.deepEqual(save.owned,[1,27]);assert.deepEqual(save.unlockedRoutes,['mountain','creek']);
+ assert.deepEqual(save.records['mountain-expert'],{medals:1,time:42});assert.equal(save.runs,1);
+ assert.equal(save.owned.includes(151),false);
+});
+
+test('Mew is the fourth Forest catch, remains earned after admin re-lock, and never becomes a starter',()=>{
+ const forest=ROUTES.findIndex(r=>r.id==='forest');
+ for(const admin of [false,true]){
+  let save=blankSave();chooseStarter(save,25,'red');if(admin)unlockAdmin(save,'1234');
+  for(const reward of [10,16,43,151]){
+   assert.equal(nextReward(save,forest),reward);
+   const run=createMaze(forest,'relaxed',84,25,reward);run.status='won';completeRun(save,run);
+   save=sanitizeSave(JSON.parse(JSON.stringify(save)));
+  }
+  if(admin)lockAdmin(save);
+  assert.deepEqual(save.owned,[25,10,16,43,151]);assert.equal(save.runs,4);
+  assert.ok(collectionIds(save).includes(151));
+ }
+ assert.equal(chooseStarter(blankSave(),151,'red'),false);
+});
+
+test('older admin saves recover completed trails without inventing a Mew catch',()=>{
+ const old={...blankSave(),starter:4,adminUnlocked:true,owned:Object.values(SPECIES).map(p=>p.id).filter(id=>id!==151),unlockedRoutes:ROUTES.map(r=>r.id),records:{'forest-adventure':{time:42,medals:2}},runs:1};
+ delete old.adminProgress;
+ let save=sanitizeSave(old);assert.equal(save.adminProgress.restoredFromRecords,true);
+ assert.ok(save.owned.includes(151));assert.equal(nextReward(save,6),151);
+ save=sanitizeSave(JSON.parse(JSON.stringify(save)));lockAdmin(save);
+ assert.deepEqual(save.owned,[4,10,16,43]);assert.deepEqual(save.unlockedRoutes,['mountain','forest']);
+ assert.deepEqual(save.records,old.records);assert.equal(save.runs,1);
+});
+
+test('earned admin snapshots reject unknown species, other starters, and unknown trails',()=>{
+ const save=sanitizeSave({...blankSave(),starter:7,adminUnlocked:true,adminProgress:{owned:[7,7,25,151,999,'151',null],unlockedRoutes:['mountain','forest','unknown','__proto__',null]}});
+ lockAdmin(save);assert.deepEqual(save.owned,[7,151]);assert.deepEqual(save.unlockedRoutes,['mountain','forest']);
+ assert.equal(save.adminProgress,null);
 });

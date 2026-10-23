@@ -6,7 +6,7 @@ const sourceDirectory=process.argv[2];
 if(!sourceDirectory){console.error('Usage: node scripts/import-art.mjs <source-directory>');process.exit(1);}
 const source=pathToFileURL(resolve(sourceDirectory)+sep),dest=new URL('../dist/',import.meta.url);
 const {DIRECTIONAL}=await import(new URL('directional-data.mjs',source));
-const ids=[27,66,104,25,1,4,7,10,16,43,54,60,120,37,58,77,41,74,95,86,124,131,138,147,6];
+const ids=[27,66,104,25,1,4,7,10,16,43,54,60,120,37,58,77,41,74,95,86,124,131,138,147,6,151];
 for(const dir of ['arena','assets','assets/directional','assets/trainers'])await mkdir(new URL(dir+'/',dest),{recursive:true});
 const hashes={};
 for(const name of ['sprite-animation.mjs','combat-art.mjs','move-art.mjs','moves.mjs','move-data.mjs','loadouts.mjs','trainers.mjs','trainer-art.mjs']){const bytes=await readFile(new URL(name,source));hashes[name]=createHash('sha256').update(bytes).digest('hex');await writeFile(new URL('arena/'+name,dest),bytes);}

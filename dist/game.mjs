@@ -62,7 +62,7 @@ export function tick(g,dt){
 }
 export function medals(g){return (g.status==='won'?1:0)+(g.found===3?1:0);}
 const LEGACY_ROUTE_ORDER=['forest','creek','autumn','cave','frost','volcano','mountain'];
-export function blankSave(){return{version:2,trainer:'red',playerName:'',starter:null,owned:[],unlocked:0,unlockedRoutes:[ROUTES[0].id],records:{},runs:0,mode:'adventure',sound:false,reduced:false,adminUnlocked:false};}
+export function blankSave(){return{version:2,trainer:'red',playerName:'',starter:null,owned:[],unlocked:0,unlockedRoutes:[ROUTES[0].id],records:{},runs:0,mode:'adventure',sound:false,reduced:false,adminUnlocked:false,adminProgress:null};}
 export function isRouteUnlocked(save,index){return Number.isInteger(index)&&!!ROUTES[index]&&(save.adminUnlocked||save.unlockedRoutes.includes(ROUTES[index].id));}
 export function unlockRoutes(save,ids){
  const unlocked=new Set([ROUTES[0].id,...save.unlockedRoutes,...ids]);
@@ -71,6 +71,17 @@ export function unlockRoutes(save,ids){
  save.unlocked=0;while(save.unlocked<ROUTES.length-1&&save.unlockedRoutes.includes(ROUTES[save.unlocked+1].id))save.unlocked++;
 }
 export function collectionIds(save){return [...(save.adminUnlocked?STARTERS:save.starter?[save.starter]:[]),...ROUTES.flatMap(r=>r.rewards)];}
+function sanitizeAdminProgress(raw,save){
+ const source=raw.adminProgress,hasSnapshot=source&&Array.isArray(source.owned)&&Array.isArray(source.unlockedRoutes);
+ const completed=ROUTES.filter(r=>Object.keys(MODES).some(m=>save.records[r.id+'-'+m]));
+ // Older admin saves mixed granted and caught companions. Keep existing rewards
+ // from completed trails, but do not grant newly added species during migration.
+ const earnedIds=new Set(completed.flatMap(r=>r.rewards));
+ const owned=hasSnapshot?source.owned:(Array.isArray(raw.owned)?raw.owned:[]).filter(id=>earnedIds.has(id));
+ const allowed=new Set(collectionIds({...save,adminUnlocked:false}));
+ const routes=new Set([ROUTES[0].id,...(hasSnapshot?source.unlockedRoutes:[]),...completed.flatMap(r=>[r.id,ROUTES[ROUTES.indexOf(r)+1]?.id])]);
+ return{owned:[...new Set([...(save.starter?[save.starter]:[]),...owned.filter(id=>allowed.has(id))])],unlockedRoutes:ROUTES.filter(r=>routes.has(r.id)).map(r=>r.id),restoredFromRecords:!hasSnapshot||source.restoredFromRecords===true};
+}
 export function sanitizeSave(raw){
  const s=blankSave();if(!raw||typeof raw!=='object')return s;
  s.playerName=normalizePlayerName(raw.playerName);
@@ -88,9 +99,19 @@ export function sanitizeSave(raw){
   const k=r.id+'-'+m,v=raw.records[k];
   if(v&&Number.isFinite(v.time)&&v.time>=0&&Number.isInteger(v.medals)&&v.medals>=1&&v.medals<=3){s.records[k]={time:v.time,medals:v.medals};const next=order.indexOf(r.id)+1;if(legacy)frontier=Math.max(frontier,Math.min(order.length-1,next));else unlocked.push(r.id,order[next]);}
  }
+ if(s.adminUnlocked)s.adminProgress=sanitizeAdminProgress(raw,s);
  unlockRoutes(s,legacy?order.slice(0,frontier+1):unlocked);
  return s;
 }
-export function chooseStarter(save,id,trainer,name=save.playerName){if(save.starter!==null||!STARTERS.includes(id)||!setTrainerProfile(save,trainer,name))return false;save.starter=id;save.owned=save.adminUnlocked?collectionIds(save):[id];return true;}
-export function nextReward(save,routeIndex){const ids=ROUTES[routeIndex].rewards;return ids.find(id=>!save.owned.includes(id))??ids[save.runs%ids.length];}
-export function completeRun(save,g){if(g.status!=='won'||g.recorded)return false;g.recorded=true;if(!save.owned.includes(g.reward))save.owned.push(g.reward);unlockRoutes(save,[ROUTES[g.routeIndex].id,ROUTES[g.routeIndex+1]?.id]);save.runs++;const k=ROUTES[g.routeIndex].id+'-'+g.mode,old=save.records[k];save.records[k]={medals:Math.max(old?.medals||0,medals(g)),time:Math.min(old?.time??Infinity,g.time)};return true;}
+export function chooseStarter(save,id,trainer,name=save.playerName){if(save.starter!==null||!STARTERS.includes(id)||!setTrainerProfile(save,trainer,name))return false;save.starter=id;save.owned=save.adminUnlocked?collectionIds(save):[id];if(save.adminProgress)save.adminProgress.owned=[id,...save.adminProgress.owned.filter(p=>!STARTERS.includes(p))];return true;}
+export function nextReward(save,routeIndex){const ids=ROUTES[routeIndex].rewards,owned=save.adminUnlocked&&save.adminProgress?save.adminProgress.owned:save.owned;return ids.find(id=>!owned.includes(id))??ids[save.runs%ids.length];}
+export function completeRun(save,g){
+ if(g.status!=='won'||g.recorded)return false;g.recorded=true;
+ if(!save.owned.includes(g.reward))save.owned.push(g.reward);
+ const earnedRoutes=[ROUTES[g.routeIndex].id,ROUTES[g.routeIndex+1]?.id];
+ if(save.adminUnlocked&&save.adminProgress){
+  if(!save.adminProgress.owned.includes(g.reward))save.adminProgress.owned.push(g.reward);
+  const routes=new Set([...save.adminProgress.unlockedRoutes,...earnedRoutes]);save.adminProgress.unlockedRoutes=ROUTES.filter(r=>routes.has(r.id)).map(r=>r.id);
+ }
+ unlockRoutes(save,earnedRoutes);save.runs++;const k=ROUTES[g.routeIndex].id+'-'+g.mode,old=save.records[k];save.records[k]={medals:Math.max(old?.medals||0,medals(g)),time:Math.min(old?.time??Infinity,g.time)};return true;
+}

@@ -18,11 +18,15 @@ Granite Highlands is Trail 01, followed by Cerulean Creek, Amberwood Trail, Moon
 
 Every partner can clear every obstacle. Matching attack elements are more effective. Difficulty changes maze size and obstacle strength; there is no time limit or health loss. The game supports mouse, touch, and keyboard input.
 
-Each biome offers three different Pokémon before repeat encounters. Normal play includes your chosen starter and twenty-one trail companions. Progress and preferences are saved in your browser; ongoing mazes restart after a page reload. Saves belong to the browser and site address where you play.
+Each biome offers three different Pokémon before repeat encounters, with Mew as a fourth discovery in Viridian Forest. Mew uses Psychic to clear obstacles. Normal play includes your chosen starter and twenty-two trail companions. Progress and preferences are saved in your browser; ongoing mazes restart after a page reload. Saves belong to the browser and site address where you play.
 
 ## Testing mode
 
-In the field guide, choose **Admin unlock** and enter **1234** to unlock all seven trails and all 25 Pokémon. This is a public, client-side gameplay testing feature, not an account password or security mechanism. It preserves earned records and capture animations. **Reset all progress** clears the unlock and this game's saved progress.
+In the field guide, choose **Admin unlock** and enter **1234** to unlock all seven trails and all 26 Pokémon, including Mew. Choose **Lock again** in the admin tools to end the test expedition and restore earned access. Your starter, real catches, completed trail records, and preferences stay saved. Pokémon caught during testing also remain yours. You can unlock again with the same password.
+
+Older admin saves did not distinguish earned Pokémon from temporary grants. Re-locking those saves keeps the chosen starter and existing Pokémon associated with completed trails. New admin sessions track earned progress separately.
+
+This is a public, client-side gameplay testing feature, not an account password or security mechanism. **Reset all progress** clears the unlock and this game's saved progress.
 
 ## Development
 

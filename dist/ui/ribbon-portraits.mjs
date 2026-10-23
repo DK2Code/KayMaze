@@ -48,6 +48,12 @@ export const RIBBON_PORTRAITS={
   "x": 1.091,
   "y": 0.0
  },
+ "assets/151.png": {
+  "width": 61.44,
+  "height": 61.44,
+  "x": -1.92,
+  "y": 0.0
+ },
  "assets/16.png": {
   "width": 74.927,
   "height": 74.927,
